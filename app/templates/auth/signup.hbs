@@ -1,0 +1,38 @@
+<div>
+<div class="get_start pull-right">
+  Don't have an account?
+  <a href="/">Log In</a>
+</div>
+<div class="clearfix"></div>
+<div class="login-logo">
+    <img src="/images/logo_large.png" alt="Happy Hours Hunter">
+</div>
+<div class="signup">
+ {{> flash}}
+ <form method="post" class="form_submit">
+  <h2>Sign Up</h2>
+  <fieldset>
+    <div class="col-md-12 pad-rgt-5 pad-lft-5">
+      <label>Full Name</label>
+      <input type="text" placeholder="Full Name" id="name" name="name" {{#if credentials}} value="{{credentials.name}}" {{/if}} required/>
+    </div>
+    <div class="col-md-12 pad-rgt-5 pad-lft-5">
+      <label>Email</label>
+      <input type="email" placeholder="Email" id="email" name="email" {{#if credentials}} value="{{credentials.email}}" {{/if}} required/>
+    </div>
+    <div class="col-md-6 pad-rgt-5 pad-lft-5">
+      <label>Password</label>
+      <input type="password" placeholder="Password" id="password" name="password" required/>
+    </div>
+    
+    <div class="col-md-6 pad-rgt-5 pad-lft-5">
+      <label>Confirm Password</label>
+      <input type="password" placeholder="Confirm Password" id="verify" name="verify" required/>
+    </div>
+  </fieldset>
+  <input type="submit" value="Sign Up" />
+  {{> form_security}}
+ </form>
+</div>
+</div>
+

@@ -1,0 +1,64 @@
+ {{> header}}
+  {{> leftbar}}
+
+   <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12 user_profile_detail pad-top-10">
+                      <h2 class="col-md-2 pad-lft-none">My Profile</h2>
+                      <form method='post' class="form_submit" action="/deleteprofile" id="deleteform">
+                      <input type="hidden" name="email" id="email" value="">
+                      <div class="col-md-3 pad-top-6"><a href="#x" class="btn edit_user"><i class="glyphicon glyphicon-edit"></i>Edit</a> <a href="#x" class="btn del_user"  onclick="userDelete('{{user.email}}');"><i class="glyphicon glyphicon-trash"></i>Delete User</a>
+                      </div>
+                      {{> form_security}}
+                      </form >
+                      <div class="col-md-12 details pad-lft-none">
+                        <form method='post' class="form_submit" action="/profile/{{user.email}}" >
+                        <div class="col-md-2 pad-lft-none pad-top-none">Email:</div>
+                        <div class="col-md-4">{{user.email}}</div>
+                        <div class="clearfix"></div>
+
+                        <div class="col-md-2 pad-lft-none">Name:</div>
+                        <div class="col-md-4">
+                          <span class="after_edit">{{user.name}}</span>
+                          <input type="text" class="form-control" value="{{user.name}}" name="name"></div>
+                        <div class="clearfix"></div>
+
+                      
+                        <div class="col-md-2 pad-lft-none">DOB:</div>
+                        <div class="col-md-4">
+                          <span class="after_edit">{{user.dob}}</span>
+                          <div class="calendar_icon">
+                            <input type="text" class="form-control" id="dob" name="dob" value="{{user.dob}}">
+                            <img src="/images/calendar.png" class="input_calendar date form_date"  name="dob1" data-link-format= 'yyyy-mm-dd' data-link-field="dob">
+                          </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <div class="col-md-2"></div>
+                        <div class="col-md-4"><input type="submit" class="btn action_btn width_100per" value="Save"></div>
+                        <div class="clearfix"></div>
+                        {{> form_security}}
+                      </form>
+                      </div>
+		            </div>
+		        </div>
+
+            <div class="profile_msg text-center">
+                      {{> flash}}
+                    </div> 
+            </div>
+        </div>
+
+<script>
+var userDelete = function (email) {
+var x = confirm("Are you sure you want to delete your account?");
+      
+      if (x){
+          var form = document.getElementById("deleteform");
+          document.getElementById('email').value=email;
+          form.submit();
+        }
+}
+</script>

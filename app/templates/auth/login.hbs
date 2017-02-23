@@ -1,0 +1,31 @@
+<div>
+<div class="pull-right get_start">
+  Don't have an account?
+  <a href="signup">Sign Up</a>
+</div>
+<div class="clearfix"></div>
+<div class="login-logo">
+    <img src="/images/logo_large.png" alt="Strat-o-matic">
+</div>
+<div class="login">
+ {{> flash}}
+ <form method='post' class="form_submit">
+  <h2>Log In</h2>
+  <p>Please enter your details below</p>
+  <fieldset>
+    <label>Email Address</label>
+    <input type="email" placeholder="Enter your email here" name="email"/>
+
+    <label class="float_lft">Password</label>
+    <div class="utilities">
+      <a href="#">Forgot password?</a>
+    </div>
+    <input type="password" placeholder="Enter your password here" name="password"/>
+  </fieldset>
+  <input type="submit" value="Login" />
+  {{> form_security}}
+  </form>
+</div>
+</div>
+
+
