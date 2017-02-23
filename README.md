@@ -103,6 +103,8 @@ We're using semi-colons and comma-last. No rhyme or reason; and some of the hapi
 ```
 The server should be running at [localhost:8000](https://localhost:8000). or http://127.0.0.1:8000
 
+## Entity Relationship Diagram
+![ERD](https://github.com/sytango-technologies/rn-crash-viewer/blob/master/ERD.png)
 
 ## Contributers
 
