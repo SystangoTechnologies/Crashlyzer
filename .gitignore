@@ -41,3 +41,7 @@ node_modules/
 # Project specific ignore
 ./log/hhh.log
 .build
+
+# Datastore file
+app/.DS_Store
+.DS_Store

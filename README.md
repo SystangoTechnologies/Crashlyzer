@@ -52,7 +52,7 @@ Crash Report Generator
 |-- server.js              // Main server file
 ```
 
-## Code
+## Code Style 
 
 We're using semi-colons and comma-last. No rhyme or reason; and some of the hapi [code convention guidelines](http://hapijs.com/styleguide). All client-side js code is also in commonJS pattern packs using webpack. Check out `.editorconfig`, `.jsbeautifyrc`, `.eslintrc` for additional code conventions used.
 
@@ -84,10 +84,15 @@ We're using semi-colons and comma-last. No rhyme or reason; and some of the hapi
     and then run
 
    `$ mysql -u root -p`
+
    `$ Enter password: root (** you can edit the passowrd and database name in config/config.js > mysql json > $default)`
+
    `$ Create database report;`
+
    `$ exit`
+
    `$ mysql -u root -p report < sqldump.sql;`
+
    `$ Enter password: root`
 
 
