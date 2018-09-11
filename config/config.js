@@ -12,7 +12,6 @@ internals.config = {
     port: {
         web: {
             $filter: 'env',
-            test: 9000,
             production: process.env.WEB_PORT,
             $default: 8000
         }
@@ -26,22 +25,20 @@ internals.config = {
     mysql: {
         $filter: 'env',
         production: {
-            host: '<production-host>',
-            user: '<username>',
-            password: '<password>',
-            database: '<db-name>'
-        },
-        test: {
-            host: 'localhost',
-            user: 'root',
-            password: 'root',
-            database: 'report'
+            host: process.env.DB_HOST || 'localhost',
+            user: process.env.DB_USER || 'myuser',
+            password: process.env.DB_PASSWORD || 'mysql',
+            database: process.env.DB_NAME || 'crashreporter',
+            port: process.env.DB_PORT|| 3306,
+            connectionLimit: process.env.DB_CONNECTION_LIMIT || 10
         },
         $default: {
             host: 'localhost',
             user: 'root',
             password: 'root',
             database: 'report',
+            port: 3306,
+            connectionLimit: 10,
             options: {}
         }
     },

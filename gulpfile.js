@@ -2,17 +2,14 @@
 
 const Gulp = require('gulp');
 const RequireDir = require('require-dir');
-
-// Load tasks
-RequireDir('./tasks');
+RequireDir('./tasks'); // Load tasks
 
 
 //  Build task definitions
-Gulp.task('prod-build', ['fonts','images', 'misc', 'styles', 'webpack:build', 'lint']);
 Gulp.task('dev-build', ['fonts', 'images', 'misc', 'styles', 'webpack:dev-build', 'lint']);
-
 Gulp.task('dev', ['dotenv','dev-build', 'watch', 'nodemon']);
 
-Gulp.task('prod', ['dotenv','prod-build','pm2']);
+Gulp.task('prod-build', ['fonts','images', 'misc', 'styles', 'webpack:build']);
+Gulp.task('prod', ['prod-build', 'forever']);
 
-Gulp.task('default', ['dev']);
+Gulp.task('default', ['prod']);

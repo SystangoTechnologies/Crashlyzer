@@ -1,0 +1,41 @@
+version: '2.1'
+services:
+  db:
+    container_name: db
+    image: mysql:5.7
+    ports:
+      - "3306:3306"  
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=mysqldb
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./db/data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d/:ro
+    healthcheck:
+      test: "/etc/init.d/mysql status"
+      interval: 1s
+      retries: 120
+        
+  web:
+    build: .
+    links:
+      - db
+    container_name: crash-reporter-app
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - WEB_PORT=${WEB_PORT}
+      - DB_HOST=db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - COOKIE_SECRET=${COOKIE_SECRET}
+      - YAR_COOKIE_SECRET=${YAR_COOKIE_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy  

@@ -16,8 +16,8 @@ internals.config = {
     $meta: 'App metadata configuration file',
     title: {
         $filter: 'env',
-        test: 'Strat-o-Matic - test',
-        production: 'Strat-o-Matic',
+        test: 'Crash-Reporter-Test',
+        production: 'Crash-Reporter',
         $default: Pkg.name
     },
     keywords: {

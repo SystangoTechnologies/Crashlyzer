@@ -51,6 +51,7 @@ exports.postForm = {
 function findByCredentials(request, reply) {
     mysql.getConnection(function(err, connection) {
         if (err) {
+            console.log("*********** MySQL Error ***********" + err);
             connection.release();
             request.yar.flash('error', 'An internal server error occurred');
             return reply.redirect('/login');
