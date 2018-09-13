@@ -21,6 +21,10 @@ exports.register = function(plugin, options, next) {
         method: 'GET',
         path: '/generateCrash',
         config: Controllers.erroreport.errorReported.insertIntoCrash
+    }, {
+        method: 'POST',
+        path: '/report',
+        config: Controllers.erroreport.errorReported.report
     }]);
     next();
 };

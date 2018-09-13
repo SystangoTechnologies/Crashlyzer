@@ -42,6 +42,11 @@ internals.manifest = {
                 options: {
                     cookieOptions: {
                         isSecure: false
+                    },
+                    skip: function(request,reply){
+                        if(request.path === '/report'){
+                            return true;
+                        }
                     }
                 }
             }

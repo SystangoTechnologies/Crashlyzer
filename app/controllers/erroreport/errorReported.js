@@ -1,15 +1,18 @@
 'use strict';
 const mysql = require('../../../lib/mysql');
+const db = require('../../../db/models');
+const Joi = require('joi');
+
 exports.showCrashReport = {
     description: 'Return the crash report',
-    handler: function(request, reply) {
-        mysql.getConnection(function(err, connection) {
+    handler: function (request, reply) {
+        mysql.getConnection(function (err, connection) {
             if (err) {
                 connection.release();
                 request.yar.flash('error', 'An internal server error occurred');
                 return reply.redirect('/crashReport');
             }
-            connection.query('SELECT er.id,replace( cr.error_msg,"\'","`") AS errorMsg,date_format(er.created_at, "%d-%m-%Y")as created_at  ,er.os_version,er.release_version,er.platform,er.model,if(er.status=1,"Open","Resolved")as status, GROUP_CONCAT(REPLACE(ucs.description, "\'", "`")SEPARATOR "/") AS steps FROM Error_Reports er LEFT JOIN Crash_Error cr ON er.error_id = cr.error_id LEFT JOIN User_Crash_Steps ucs ON er.id=ucs.report_id Group By er.id order by er.id desc', function(err, rows) {
+            connection.query('SELECT er.user_id as user_id, er.id,replace( cr.error_msg,"\'","`") AS errorMsg,date_format(er.created_at, "%d-%m-%Y")as created_at  ,er.os_version,er.release_version,er.platform,er.model,if(er.status=1,"Open","Resolved")as status, GROUP_CONCAT(REPLACE(ucs.description, "\'", "`")SEPARATOR "/") AS steps FROM Error_Reports er LEFT JOIN Crash_Error cr ON er.error_id = cr.error_id LEFT JOIN User_Crash_Steps ucs ON er.id=ucs.report_id Group By er.id order by er.id desc', function (err, rows) {
                 if (err) {
                     request.yar.flash('error', 'An internal server error occurred');
                     return reply.redirect('/crash');
@@ -31,8 +34,11 @@ exports.showCrashReport = {
     tags: ['api'] //swagger documentation
 };
 exports.changeErrorStatus = {
+    plugins: {
+        crumb: false
+    },
     description: 'Change the Error Report Status',
-    handler: function(request, reply) {
+    handler: function (request, reply) {
         var status = request.params.currentStatus;
         var id = request.params.reportId;
         var newStatus = 1;
@@ -41,13 +47,13 @@ exports.changeErrorStatus = {
             newStatus = 0;
             newstat = 'Resolved';
         }
-        mysql.getConnection(function(err, connection) {
+        mysql.getConnection(function (err, connection) {
             if (err) {
                 connection.release();
                 request.yar.flash('error', 'An internal server error occurred');
                 return reply.redirect('/crash');
             }
-            connection.query('update Error_Reports set status=? where id=?', [newStatus, id], function(err, rows) {
+            connection.query('update Error_Reports set status=? where id=?', [newStatus, id], function (err, rows) {
                 if (err) {
                     request.yar.flash('error', 'An internal server error occurred');
                     return reply.redirect('/crash');
@@ -60,9 +66,10 @@ exports.changeErrorStatus = {
     },
     tags: ['api'] //swagger documentation
 };
+
 exports.filter = {
     description: 'Get filtered error reports',
-    handler: function(request, reply) {
+    handler: function (request, reply) {
         var status = request.query.status;
         if (!status) {
             request.yar.flash('error', 'An internal server error occurred');
@@ -74,9 +81,114 @@ exports.filter = {
     tags: ['api'] //swagger documentation
 };
 
+exports.report = {
+    description: 'Store Error Reports Information',
+    auth: false,
+    validate: {
+        payload: {
+            user_id: Joi.number().integer().required(),
+            report_data: Joi.object({
+                status: Joi.number().integer().required(),
+                User_Device_Information: Joi.object({
+                    os_version: Joi.string().required(),
+                    release_version: Joi.string().required(),
+                    platform: Joi.string().required(),
+                    model: Joi.string().required()
+                }),
+                Crash_Point: Joi.object({
+                    error_msg: Joi.string().required(),
+                    error_stacktrace: Joi.string().required()
+                }),
+                User_Steps: Joi.array().items(
+                    Joi.object({
+                        description: Joi.string().required(),
+                        methodName: Joi.string().required(),
+                        class: Joi.string().required(),
+                        actionOn: Joi.string().required()
+                    })
+                ).min(1).required()
+            })
+        },
+        failAction: (request, reply, error) => {
+
+            return reply({ message: error.message })
+        }
+    },
+    handler: async function (request, reply) {
+        let transactionObject;
+        try {
+
+            let user_id = request.payload.user_id;
+            let User_Device_Information = request.payload.report_data.User_Device_Information;
+            let Crash_Point = request.payload.report_data.Crash_Point;
+            let User_Steps = request.payload.report_data.User_Steps;
+            let status = request.payload.report_data.status;
+
+            // Creating Transaction
+            transactionObject = await db.sequelize.transaction();
+
+            let crash_error = await db.Crash_Error.create({
+                error_msg: Crash_Point.error_msg,
+                error_stacktrace: Crash_Point.error_stacktrace
+            }, { transaction: transactionObject });
+
+            let error_reports = await db.Error_Reports.create({
+                user_id: user_id,
+                os_version: User_Device_Information.os_version,
+                release_version: User_Device_Information.release_version,
+                platform: User_Device_Information.platform,
+                model: User_Device_Information.model,
+                error_id: crash_error.error_id,
+                status: status
+            }, { transaction: transactionObject })
+
+            let CrashSteps = await db.Crash_Steps.bulkCreate(
+                User_Steps.map(user_step => {
+                    return {
+                        method: user_step.methodName,
+                        class: user_step.class
+                    }
+                }), { transaction: transactionObject }
+            );
+
+            let step_ids = CrashSteps.map(crashStep => crashStep.step_id);
+
+            let userCrashReports = await db.User_Crash_Steps.bulkCreate(
+                User_Steps.map((user_step, index) => {
+                    return {
+                        description: user_step.description,
+                        report_id: error_reports.id,
+                        step_id: step_ids[index],
+                        actionOn: user_step.actionOn
+
+                    }
+                }, { transaction: transactionObject })
+            );
+
+            // Commit Transaction
+            await transactionObject.commit();
+
+            return reply({
+                status: 200,
+                message: 'Successfully added.'
+            });
+
+        } catch (err) {
+            console.log(err);
+            // Rollback Transaction
+            await transactionObject.rollback();
+            return reply({
+                status: 500,
+                message: err.message
+            });
+        }
+    },
+    tags: ['api'] //swagger documentation
+};
+
 function getFilteredError(request, reply, status) {
     var queryString = '';
-    mysql.getConnection(function(err, connection) {
+    mysql.getConnection(function (err, connection) {
         if (status !== 'Select') {
             queryString = 'SELECT er.id,replace(cr.error_msg, "\'","`") AS errorMsg,date_format(er.created_at, "%d-%m-%Y")as created_at,er.os_version,er.release_version,er.platform,er.model,if(er.status=1,"Open","Resolved")as status, GROUP_CONCAT(REPLACE(ucs.description, "\'", "`")SEPARATOR "/") AS steps FROM Error_Reports er LEFT JOIN Crash_Error cr ON er.error_id = cr.error_id LEFT JOIN User_Crash_Steps ucs ON er.id=ucs.report_id Group By er.id having status="' + status + '" order by er.id desc ';
         } else {
@@ -87,7 +199,7 @@ function getFilteredError(request, reply, status) {
             request.yar.flash('error', 'An internal server pool error occurred');
             return reply.redirect('/crash');
         }
-        connection.query(queryString, function(err, rows) {
+        connection.query(queryString, function (err, rows) {
             if (err) {
                 request.yar.flash('error', 'An internal server error occurred' + err);
                 return reply.redirect('/crash');
@@ -115,13 +227,13 @@ exports.insertIntoCrash = {
         mode: 'try',
         strategy: 'standard'
     },
-    handler: function(request, reply) {
+    handler: function (request, reply) {
 
         //get data
         var data = request.query.data;
 
         //replace special charactors from data
-        data = data.replace(/[\/\\']/g,"");
+        data = data.replace(/[\/\\']/g, "");
         var report_data = JSON.parse(data).report_data;
 
         if (request.query.data === undefined) {
@@ -132,14 +244,14 @@ exports.insertIntoCrash = {
         }
         var error_id = saveCrashError(report_data.Crash_Point, request, reply);
         var report_id = saveErrorReports(report_data.User_Device_Information, error_id, request, reply);
-        console.log('report id: '+report_id);
+        console.log('report id: ' + report_id);
         var step_id = 0;
         var userData = report_data.User_Steps;
         for (var loop = 0; loop < userData.length; loop++) {
             step_id = checkDuplicateCrashSteps(userData[loop], report_id, request, reply);
         }
 
-        if(report_id){
+        if (report_id) {
             return reply({ status: 1, msg: 'successfully created error report' });
         }
     },
@@ -148,12 +260,12 @@ exports.insertIntoCrash = {
 
 function saveCrashError(crash_Point, request, reply) {
     var error_id = Math.floor(Math.random() * 90000) + 1000;
-    mysql.getConnection(function(err, connection) {
+    mysql.getConnection(function (err, connection) {
         if (err) {
             connection.release();
             return reply({ status: 0, msg: err });
         }
-        connection.query('insert into Crash_Error(`error_id`,`error_msg`,`error_stacktrace`) VALUES(?,?,?)', [error_id, crash_Point.error_msg, crash_Point.error_stacktrace], function(err, rows) {
+        connection.query('insert into Crash_Error(`error_id`,`error_msg`,`error_stacktrace`) VALUES(?,?,?)', [error_id, crash_Point.error_msg, crash_Point.error_stacktrace], function (err, rows) {
             if (err) {
                 return reply({ status: 0, msg: err });
             }
@@ -177,12 +289,12 @@ function saveErrorReports(User_Device_Information, error_id, request, reply) {
     if (status == undefined) {
         status = 0;
     }
-    mysql.getConnection(function(err, connection) {
+    mysql.getConnection(function (err, connection) {
         if (err) {
             connection.release();
             return report_id;
         }
-        connection.query('insert into Error_Reports(`id`,`status`,`updated_at`,`os_version`,`release_version`,`platform`,`model`,`error_id`) VALUES(?,?,?,?,?,?,?,?)', [report_id, status, updated_at, User_Device_Information.os_version, User_Device_Information.release_version, User_Device_Information.platform, User_Device_Information.model, error_id], function(err, rows) {
+        connection.query('insert into Error_Reports(`id`,`status`,`updated_at`,`os_version`,`release_version`,`platform`,`model`,`error_id`) VALUES(?,?,?,?,?,?,?,?)', [report_id, status, updated_at, User_Device_Information.os_version, User_Device_Information.release_version, User_Device_Information.platform, User_Device_Information.model, error_id], function (err, rows) {
             if (err) {
                 return report_id;
             }
@@ -194,13 +306,13 @@ function saveErrorReports(User_Device_Information, error_id, request, reply) {
 
 function checkDuplicateCrashSteps(CrashSteps, id, request, reply) {
     var step_id = null;
-    mysql.getConnection(function(err, connection) {
+    mysql.getConnection(function (err, connection) {
         if (err) {
             connection.release();
             request.yar.flash('error', 'An internal server error occurred');
             return step_id;
         }
-        connection.query('select step_id from Crash_Steps where method=? and class= ? limit 1', [CrashSteps.method, CrashSteps.class], function(err, rows) {
+        connection.query('select step_id from Crash_Steps where method=? and class= ? limit 1', [CrashSteps.method, CrashSteps.class], function (err, rows) {
             if (err) {
                 return step_id;
             } else if (rows.length > 0) {
@@ -217,13 +329,13 @@ function checkDuplicateCrashSteps(CrashSteps, id, request, reply) {
 
 function saveCrashSteps(CrashSteps, id, request, reply) {
     var step_id = Math.floor(Math.random() * 90000) + 9000;
-    mysql.getConnection(function(err, connection) {
+    mysql.getConnection(function (err, connection) {
         if (err) {
             connection.release();
             request.yar.flash('error', 'An internal server error occurred');
             return reply({ status: 0, msg: err });
         }
-        connection.query('insert into Crash_Steps(`step_id`,`method`,`class`) VALUES(?,?,?)', [step_id, CrashSteps.methodName, CrashSteps.class], function(err, rows) {
+        connection.query('insert into Crash_Steps(`step_id`,`method`,`class`) VALUES(?,?,?)', [step_id, CrashSteps.methodName, CrashSteps.class], function (err, rows) {
             if (err) {
                 request.yar.flash('error', 'An internal server error occurred');
                 return reply({ status: 0, msg: err });
@@ -238,13 +350,13 @@ function saveCrashSteps(CrashSteps, id, request, reply) {
 function saveUserCrashSteps(CrashSteps, id, step_id, request, reply) {
     var primaryID = Math.floor(Math.random() * 90000) + 7000;
     var UserCrashStepId = null;
-    mysql.getConnection(function(err, connection) {
+    mysql.getConnection(function (err, connection) {
         if (err) {
             connection.release();
             request.yar.flash('error', 'An internal server error occurred');
             return reply({ status: 0, msg: err });
         }
-        connection.query('insert into User_Crash_Steps(`report_id`,`step_id`,`actionOn`,`date`,`id`,`description`) VALUES(?,?,?,?,?,?)', [id, step_id, CrashSteps.actionOn, CrashSteps.date, primaryID, CrashSteps.description], function(err, rows) {
+        connection.query('insert into User_Crash_Steps(`report_id`,`step_id`,`actionOn`,`date`,`id`,`description`) VALUES(?,?,?,?,?,?)', [id, step_id, CrashSteps.actionOn, CrashSteps.date, primaryID, CrashSteps.description], function (err, rows) {
             if (err) {
                 request.yar.flash('error', 'An internal server error occurred');
             } else {
