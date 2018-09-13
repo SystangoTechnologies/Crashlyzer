@@ -190,9 +190,9 @@ function getFilteredError(request, reply, status) {
     var queryString = '';
     mysql.getConnection(function (err, connection) {
         if (status !== 'Select') {
-            queryString = 'SELECT er.id,replace(cr.error_msg, "\'","`") AS errorMsg,date_format(er.created_at, "%d-%m-%Y")as created_at,er.os_version,er.release_version,er.platform,er.model,if(er.status=1,"Open","Resolved")as status, GROUP_CONCAT(REPLACE(ucs.description, "\'", "`")SEPARATOR "/") AS steps FROM Error_Reports er LEFT JOIN Crash_Error cr ON er.error_id = cr.error_id LEFT JOIN User_Crash_Steps ucs ON er.id=ucs.report_id Group By er.id having status="' + status + '" order by er.id desc ';
+            queryString = 'SELECT er.user_id as user_id, er.id,replace(cr.error_msg, "\'","`") AS errorMsg,date_format(er.created_at, "%d-%m-%Y")as created_at,er.os_version,er.release_version,er.platform,er.model,if(er.status=1,"Open","Resolved")as status, GROUP_CONCAT(REPLACE(ucs.description, "\'", "`")SEPARATOR "/") AS steps FROM Error_Reports er LEFT JOIN Crash_Error cr ON er.error_id = cr.error_id LEFT JOIN User_Crash_Steps ucs ON er.id=ucs.report_id Group By er.id having status="' + status + '" order by er.id desc ';
         } else {
-            queryString = 'SELECT er.id,replace(cr.error_msg, "\'","`") AS errorMsg,date_format(er.created_at, "%d-%m-%Y")as created_at,er.os_version,er.release_version,er.platform,er.model,if(er.status=1,"Open","Resolved")as status, GROUP_CONCAT(REPLACE(ucs.description, "\'", "`")SEPARATOR "/") AS steps FROM Error_Reports er LEFT JOIN Crash_Error cr ON er.error_id = cr.error_id LEFT JOIN User_Crash_Steps ucs ON er.id=ucs.report_id Group By er.id order by er.id desc';
+            queryString = 'SELECT er.user_id as user_id, er.id,replace(cr.error_msg, "\'","`") AS errorMsg,date_format(er.created_at, "%d-%m-%Y")as created_at,er.os_version,er.release_version,er.platform,er.model,if(er.status=1,"Open","Resolved")as status, GROUP_CONCAT(REPLACE(ucs.description, "\'", "`")SEPARATOR "/") AS steps FROM Error_Reports er LEFT JOIN Crash_Error cr ON er.error_id = cr.error_id LEFT JOIN User_Crash_Steps ucs ON er.id=ucs.report_id Group By er.id order by er.id desc';
         }
         if (err) {
             connection.release();
