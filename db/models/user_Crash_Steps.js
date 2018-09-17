@@ -27,7 +27,7 @@ module.exports = function(sequelize, DataTypes) {
             allowNull: false
         },
         description: {
-            type: Sequelize.TEXT,
+            type: Sequelize.TEXT
         }
     }, {
         timestamps: true

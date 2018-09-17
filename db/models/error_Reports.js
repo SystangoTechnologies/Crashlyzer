@@ -13,10 +13,6 @@ module.exports = function(sequelize, DataTypes) {
             type: Sequelize.INTEGER,
             allowNull: true
         },
-        status: {
-            type: DataTypes.TINYINT,
-            allowNull: false
-        },
         os_version: {
             type: Sequelize.STRING,
             allowNull: true
@@ -34,6 +30,15 @@ module.exports = function(sequelize, DataTypes) {
         error_id: {
             type: Sequelize.INTEGER,
             allowNull: true
+        },
+        manufacturer: {
+            type: Sequelize.STRING
+        },
+        date: {
+            type: Sequelize.DATE
+        },
+        error_type: {
+            type: Sequelize.STRING
         }
     }, {
         timestamps: true,

@@ -83,63 +83,67 @@ exports.filter = {
 
 exports.report = {
     description: 'Store Error Reports Information',
-    auth: false,
+    auth: false ,
     validate: {
         payload: {
-            user_id: Joi.number().integer().required(),
+            user_id: Joi.number().integer(),
+            error_type: Joi.string().allow('').optional(),
             report_data: Joi.object({
-                status: Joi.number().integer().required(),
                 User_Device_Information: Joi.object({
-                    os_version: Joi.string().required(),
-                    release_version: Joi.string().required(),
-                    platform: Joi.string().required(),
-                    model: Joi.string().required()
-                }),
-                Crash_Point: Joi.object({
-                    error_msg: Joi.string().required(),
-                    error_stacktrace: Joi.string().required()
+                    manufacturer: Joi.string().allow('').optional(),
+                    model: Joi.string().allow('').optional(),
+                    release_version: Joi.string().allow('').optional(),
+                    platform: Joi.string().allow('').optional(),
+                    date: Joi.string().allow('').optional(),
+                    os_version: Joi.string().allow('').optional()
                 }),
                 User_Steps: Joi.array().items(
                     Joi.object({
-                        description: Joi.string().required(),
-                        methodName: Joi.string().required(),
-                        class: Joi.string().required(),
-                        actionOn: Joi.string().required()
+                        methodName: Joi.string().allow('').optional(),
+                        class: Joi.string().allow('').optional(),
+                        date: Joi.string().allow('').optional(),
+                        actionOn: Joi.string().allow('').optional(),
+                        description: Joi.string().allow('').optional()
                     })
-                ).min(1).required()
-            })
-        },
+                    ).min(1).required(),
+                    Crash_Point: Joi.object({
+                        error_msg: Joi.string().allow('').optional(),
+                        error_stacktrace: Joi.string().allow('').optional()
+                    })
+                }),
+            },
         failAction: (request, reply, error) => {
 
-            return reply({ message: error.message })
+            return reply({ message: "Error :"+error })
         }
-    },
+    }, 
     handler: async function (request, reply) {
         let transactionObject;
         try {
-
             let user_id = request.payload.user_id;
+            let error_type = request.payload.error_type;
             let User_Device_Information = request.payload.report_data.User_Device_Information;
             let Crash_Point = request.payload.report_data.Crash_Point;
             let User_Steps = request.payload.report_data.User_Steps;
-            let status = request.payload.report_data.status;
 
             // Creating Transaction
             transactionObject = await db.sequelize.transaction();
 
             let crash_error = await db.Crash_Error.create({
                 error_msg: Crash_Point.error_msg,
-                error_stacktrace: Crash_Point.error_stacktrace
+                error_stacktrace: Crash_Point.error_stacktrace,
             }, { transaction: transactionObject });
 
             let error_reports = await db.Error_Reports.create({
                 user_id: user_id,
+                error_type: error_type,
                 os_version: User_Device_Information.os_version,
                 release_version: User_Device_Information.release_version,
                 platform: User_Device_Information.platform,
                 model: User_Device_Information.model,
                 error_id: crash_error.error_id,
-                status: status
+                manufacturer: User_Device_Information.manufacturer,
+                date: new Date(User_Device_Information.date)
             }, { transaction: transactionObject })
 
             let CrashSteps = await db.Crash_Steps.bulkCreate(
@@ -159,15 +163,14 @@ exports.report = {
                         description: user_step.description,
                         report_id: error_reports.id,
                         step_id: step_ids[index],
-                        actionOn: user_step.actionOn
-
+                        actionOn: user_step.actionOn,
+                        date: new Date(user_step.date)
                     }
                 }, { transaction: transactionObject })
             );
 
             // Commit Transaction
             await transactionObject.commit();
-
             return reply({
                 status: 200,
                 message: 'Successfully added.'
