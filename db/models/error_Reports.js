@@ -39,6 +39,10 @@ module.exports = function(sequelize, DataTypes) {
         },
         error_type: {
             type: Sequelize.STRING
+        },
+        status:{
+            type: Sequelize.INTEGER,
+            defaultValue: 0
         }
     }, {
         timestamps: true,
