@@ -1,81 +1,86 @@
 {{> header}}
-  {{> leftbar}}
+{{> leftbar}}
 
-   <div id="page-content-wrapper">
-            <div class="container-fluid">
-                <div class="row mar-bottom-15">
-                  <form method="get" action="/report_filter">
-                    <div class="col-md-4 col-lg-4 pad-rgt-none">
-                        <label class="col-md-12 pad-top-6 pad-lft-none">Status</label>
-                        <div class="col-md-12 pad-lft-none select_field">
-                            <select class=" form-control" name="status" id="status" >
-                               <option value="Select" {{#if_eq status '===' 'Select'}} selected {{/if_eq}}>Select</option>
-                                <option value="Open" {{#if_eq status '===' 'Open'}} selected {{/if_eq}}>Open</option>
-                                <option value="Resolved" {{#if_eq status '===' 'Resolved'}} selected {{/if_eq}}>Resolved</option>
-                            </select>
-                        </div>
+<div id="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row mar-bottom-15">
+            <form method="get" action="/report_filter">
+                <div class="col-md-4 col-lg-4 pad-rgt-none">
+                    <label class="col-md-12 pad-top-6 pad-lft-none">Status</label>
+                    <div class="col-md-12 pad-lft-none select_field">
+                        <select class=" form-control" name="status" id="status">
+                            <option value="Select" {{#if_eq status '===' 'Select'}} selected {{/if_eq}}>Select</option>
+                            <option value="Open" {{#if_eq status '===' 'Open'}} selected {{/if_eq}}>Open</option>
+                            <option value="Resolved" {{#if_eq status '===' 'Resolved'}} selected {{/if_eq}}>Resolved</option>
+                        </select>
                     </div>
-
-                    <div class="col-md-4 col-lg-4">
-                        <input type="submit" class="btn action_btn filter_btn mar-top-31" value="" title="Filter">
-                        <input type="submit" class="btn action_btn reset_btn mar-top-31 mar-lft-15" onclick="resetFilters()" value="" title="Reset">
-                    </div>
-                  </form>
                 </div>
 
-                <div class="clearfix"></div>    
-                <div class="row block_scroll">
-                    <div class="col-lg-12">
-		            	<div class="table-responsive data_main_table">
-                        {{> flash}}
-                        {{#if jsonarr.length}} 
-			                <table class="table table-bordered table-fixed" border="0" cellpadding="0" cellspacing="0">
-			                	<thead>
-                                    <tr>
-    			                		<th width="6%">Bug Id</th>
-    			                		<th width="46%">Error Message</th>
-                                        <th width="6%">User</th>
-                                        <th width="10%">Date</th>
-    			                		
-                                        <th width="10%">Status</th>
-                                        <th width="12%">Action</th>
-    			                	</tr>
-                                </thead>
-                                <tbody class="block_scroll">                    
-			                	{{#each jsonarr}}
-                                    <tr>
-                                        <td>{{id}}</td>
+                <div class="col-md-4 col-lg-4">
+                    <input type="submit" class="btn action_btn filter_btn mar-top-31" value="" title="Filter">
+                    <input type="submit" class="btn action_btn reset_btn mar-top-31 mar-lft-15" onclick="resetFilters()"
+                        value="" title="Reset">
+                </div>
+            </form>
+        </div>
 
-                                        <td class="error_msg">{{errorMsg}}</td>
-                                        <td>{{user_id}}</td>
-                                        <td>{{created_at}}</td>
-                                        
-                                        <td>{{status}}</td>
+        <div class="clearfix"></div>
+        <div class="row block_scroll">
+            <div class="col-lg-12">
+                <div class="table-responsive data_main_table">
+                    {{> flash}}
+                    {{#if jsonarr.length}}
+                    <table class="table table-bordered table-fixed" border="0" cellpadding="0" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th width="6%">Bug Id</th>
+                                <th width="46%">Error Message</th>
+                                <th width="6%">User</th>
+                                <th width="10%">Date</th>
 
-                                        
-                                        <td><a href="javascript:void(0)" data-toggle="modal"  data-target="#myModal3" class="icon_link" onclick="openModal('{{os_version}}', '{{release_version}}','{{platform}}','{{model}}','{{errorMsg}}','{{description}}','{{steps}}');"><img src="/images/details.png" height="20" title="Details"></a>
-                                        {{#if_eq status '===' 'Open'}}
-                                        <a href="/report/status/{{id}}/{{status}}" class="icon_link"><img src="/images/resolve.png" height="20" title="Resolved"></a>
-                                        {{else}}
-                                        <a href="/report/status/{{id}}/{{status}}" class="icon_link"><img src="/images/reopen.png" height="20" title="Reopen"></a>
-                                        {{/if_eq}}
-                                        </td>
-                                        
-                                    </tr>
-                                {{/each}}
-                                
-                                </tbody>
-			                </table>
-                        {{/if}}
-		                </div>
-		            </div>
-		        </div>
+                                <th width="10%">Status</th>
+                                <th width="12%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="block_scroll">
+                            {{#each jsonarr}}
+                            <tr>
+                                <td>{{id}}</td>
+
+                                <td class="error_msg">{{errorMsg}}</td>
+                                <td>{{user_id}}</td>
+                                <td>{{created_at}}</td>
+
+                                <td>{{status}}</td>
+
+
+                                <td><a href="javascript:void(0)" data-toggle="modal" data-target="#myModal3" class="icon_link"
+                                        onclick="openModal('{{os_version}}', '{{release_version}}','{{platform}}','{{model}}','{{errorMsg}}','{{description}}','{{steps}}','{{stacktrace}}');"><img
+                                            src="/images/details.png" height="20" title="Details"></a>
+                                    {{#if_eq status '===' 'Open'}}
+                                    <a href="/report/status/{{id}}/{{status}}" class="icon_link"><img src="/images/resolve.png"
+                                            height="20" title="Resolved"></a>
+                                    {{else}}
+                                    <a href="/report/status/{{id}}/{{status}}" class="icon_link"><img src="/images/reopen.png"
+                                            height="20" title="Reopen"></a>
+                                    {{/if_eq}}
+                                </td>
+
+                            </tr>
+                            {{/each}}
+
+                        </tbody>
+                    </table>
+                    {{/if}}
+                </div>
             </div>
         </div>
+    </div>
+</div>
 
 <!-- div start for steps-->
 
-<div class="modal fade modal_details steps"  id="myModal3" role="dialog">
+<div class="modal fade modal_details steps" id="myModal3" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -100,8 +105,13 @@
                         <td id="model"></td>
                     </tr>
                 </table>
-
-                <h5 class="table-main_heading text-center">Steps to reproduce the crash</h5>
+                <div class="tab">
+                    <button style="float:left;" id="StepsButton" class="tablinks active" onclick="openTab(event, 'openSteps')">Steps</button>
+                    <button style="float:right;" class="tablinks" onclick="openTab(event, 'openStacktrace')">View
+                        StackTrace</button>
+                </div>
+                <div id="openSteps" class="crashtabcontent">
+                    <h5 class="table-main_heading text-center">Steps to reproduce the crash</h5>
                 <table class="data_report_details report_details_full_width" id="crtab">
                     <tr>
                         <td><strong>S.No.</strong></td>
@@ -109,159 +119,195 @@
                     </tr>
                 </table>
                 <div class="data_report_details data_report_details_table" id="mydiv">
-                    
-                   <!--  <table class="table table-bordered" id="crtab">
-                        <tr><th>User</th><th>Class</th>
-                        </tr>
-                        
-                    </table> -->
+
+                    <!--  <table class="table table-bordered" id="crtab">
+                            <tr><th>User</th><th>Class</th>
+                            </tr>
+                            
+                        </table> -->
+                </div>
+                </div>
+                
+            </div>
+            <div id="openStacktrace" class="crashtabcontent">
+                <div class="data_report_details data_report_details_table" id="stackTraceDiv" style="margin-left:15px;padding-right: 18px">
                 </div>
             </div>
-        </div>              
+        </div>
     </div>
-</div> 
+</div>
+</div>
 
 <!-- div end steps -->
 
 <!-- dic start for image -->
- <div class="modal fade modal_details img-1" id="myModal1" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 id="h1tag" class="modal-title"></h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="data_report_img text-center">
-                            <div class="data_img_bg">
-                                <img id="ima1" class="img-responsive">
-                            </div>
-                        </div>
-                        <table class="report_table_details">
-                            <tr>
-                                <td><strong>OS Version</strong></td>
-                                 <td id="osVersion2"></td>
-                            </tr>
-
-                            <tr>
-                                <td><strong>Release</strong></td>
-                                <td id="release2"></td>
-                            </tr>
-
-                            <tr>
-                                <td><strong>Plateform</strong></td>
-                                <td id="platform2"></td>
-                            </tr>
-
-                            <tr>
-                                <td><strong>Model</strong></td>
-                                <td id="model2"></td>
-                            </tr>
-                        </table>
-
-                        <div class="border_box">
-                            <h5 class="descrip_head">Description</h5>
-                            <div class="report_description">
-                                <p id="test">
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>              
+<div class="modal fade modal_details img-1" id="myModal1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 id="h1tag" class="modal-title"></h4>
             </div>
+            <div class="modal-body">
+                <div class="data_report_img text-center">
+                    <div class="data_img_bg">
+                        <img id="ima1" class="img-responsive">
+                    </div>
+                </div>
+                <table class="report_table_details">
+                    <tr>
+                        <td><strong>OS Version</strong></td>
+                        <td id="osVersion2"></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Release</strong></td>
+                        <td id="release2"></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Plateform</strong></td>
+                        <td id="platform2"></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Model</strong></td>
+                        <td id="model2"></td>
+                    </tr>
+                </table>
+
+                <div class="border_box">
+                    <h5 class="descrip_head">Description</h5>
+                    <div class="report_description">
+                        <p id="test">
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
         </div>
+    </div>
+</div>
 <!--div end for image  -->
 
 
 <!-- div starts for description -->
 
 <div class="modal fade modal_details" id="myModal2" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 id="h3tag" class="modal-title"></h4>
-                    </div>
-                    <div class="modal-body">
-                        <table class="report_details_full_width">
-                            <tr>
-                                <td><strong>OS Version</strong></td>
-                                 <td id="osVersion1"></td>
-
-                                <td><strong>Release</strong></td>
-                                <td id="release1"></td>
-                            </tr>
-
-                            <tr>
-                                <td><strong>Plateform</strong></td>
-                                <td id="platform1"></td>
-
-                                <td><strong>Model</strong></td>
-                                <td id="model1"></td>
-                            </tr>
-                        </table>
-
-                        <div class="border_box">
-                            <h5 class="descrip_head">Description</h5>
-                            <div class="report_description">
-                                <p id="test1">
-                                </p>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>              
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 id="h3tag" class="modal-title"></h4>
             </div>
+            <div class="modal-body">
+                <table class="report_details_full_width">
+                    <tr>
+                        <td><strong>OS Version</strong></td>
+                        <td id="osVersion1"></td>
+
+                        <td><strong>Release</strong></td>
+                        <td id="release1"></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Plateform</strong></td>
+                        <td id="platform1"></td>
+
+                        <td><strong>Model</strong></td>
+                        <td id="model1"></td>
+                    </tr>
+                </table>
+
+                <div class="border_box">
+                    <h5 class="descrip_head">Description</h5>
+                    <div class="report_description">
+                        <p id="test1">
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
 
-        <!-- div ends for description -->
+<!-- div ends for description -->
 
 <script>
-var openModal = function (osver,relver,pltf,mdl,emsg,desc,steps) {
-var stp='';
+    var openModal = function (osver, relver, pltf, mdl, emsg, desc, steps,stacktrace) {
+        document.getElementById("StepsButton").click();
+        document.getElementById('StepsButton').className = 'tablinks active';
 
-        stp=steps.split("/");
+        var stp = '';
+
+        stp = steps.split("/");
         document.getElementById('osVersion').innerHTML = osver;
         document.getElementById('release').innerHTML = relver;
         document.getElementById('platform').innerHTML = pltf;
         document.getElementById('model').innerHTML = mdl;
         document.getElementById('h2tag').innerHTML = emsg;
 
-          var cell=0;
-          var row=0; 
-          var nrRows=stp.length;
-          var root=document.getElementById('mydiv');
-          var tab=document.createElement('table');
-          tab.className="table table-bordered";
+        var cell = 0;
+        var row = 0;
+        var nrRows = stp.length;
+        var root = document.getElementById('mydiv');
+        var tab = document.createElement('table');
+        tab.className = "table table-bordered";
 
-          for(var i=0;i<nrRows;i++){
-            row=document.createElement('tr');
-            for(var j=0;j<2;j++){
-            if(j==0)   
-            {
-            cell=document.createElement('td');
-            cell.appendChild(document.createTextNode(i+1));
-            } 
-            else{
-            cell=document.createElement('td');
-            cell.appendChild(document.createTextNode(stp[i]));
+        for (var i = 0; i < nrRows; i++) {
+            row = document.createElement('tr');
+            for (var j = 0; j < 2; j++) {
+                if (j == 0) {
+                    cell = document.createElement('td');
+                    cell.appendChild(document.createTextNode(i + 1));
+                }
+                else {
+                    cell = document.createElement('td');
+                    cell.appendChild(document.createTextNode(stp[i]));
+                }
+                row.appendChild(cell);
             }
-            row.appendChild(cell);
-          }
 
             tab.appendChild(row);
         }
-            //tab.appendChild(tbo);
-            root.innerHTML='';
-            root.appendChild(tab);
+        //tab.appendChild(tbo);
+        root.innerHTML = '';
+        root.appendChild(tab);
+        appendStackTrace(stacktrace);
+    }
 
-}
+    function appendStackTrace(stacktrace) {
+        var root = document.getElementById('stackTraceDiv');
+        //var stackTraceArr = JSON.parse(stacktrace);
+        //alert("stackTraceArr");
+        //var stacktraceMsg = 'Error in method:"'+stackTraceArr['methodName']+'""  of file:"'+stackTraceArr['file']+'" in line no '+stackTraceArr['lineNumber']+' and cloumn no '+stackTraceArr['column']
+        root.innerHTML = stacktrace;
+    }
 
+    var resetFilters = function () {
 
-var resetFilters=function(){
-    
-    var status = document.getElementById('status');
-    status.value = 'Select';
-}
+        var status = document.getElementById('status');
+        status.value = 'Select';
+    }
+    var openTab = function (evt, tabName) {
+        // Declare all variables
+        var i, tabcontent, tablinks;
+        // Get all elements with class="crashtabcontent" and hide them
+        tabcontent = document.getElementsByClassName("crashtabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        // Get all elements with class="tablinks" and remove the class "active"
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        document.getElementById(tabName).style.display = "block";
+        if (evt.currentTarget !== undefined) {
+            evt.currentTarget.className += " active";
+        }
+
+    }
 </script>
