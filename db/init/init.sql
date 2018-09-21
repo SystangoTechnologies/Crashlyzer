@@ -13,42 +13,45 @@ CREATE TABLE Web_App_Users (
   PRIMARY KEY (user_id)
 );
 
-CREATE TABLE Crash_Error (
-  error_id 		 	    INT 	 NOT NULL,
-  error_msg 		    text 	 NOT NULL,
-  error_stacktrace  text 	 NOT NULL,
-  PRIMARY KEY (error_id)
-);
+CREATE TABLE Crash_Error 
+(error_id INTEGER NOT NULL auto_increment,
+ error_msg TEXT NOT NULL,
+ error_stacktrace VARCHAR(255) NOT NULL,
+ created_at DATETIME NOT NULL, 
+ updated_at DATETIME NOT NULL, 
+ PRIMARY KEY (error_id)) ENGINE=InnoDB;
 
-CREATE TABLE Crash_Steps (
-  step_id 		 INT 	   NOT NULL,
-  method 			 text 	 NOT NULL,
-  class 			 text 	 NOT NULL,
-  PRIMARY KEY (step_id)
-);
+CREATE TABLE Crash_Steps 
+(step_id INTEGER NOT NULL auto_increment , 
+ method TEXT NOT NULL, 
+ class VARCHAR(255) NOT NULL, 
+ created_at DATETIME NOT NULL, 
+ updated_at DATETIME NOT NULL, 
+ PRIMARY KEY (step_id)) ENGINE=InnoDB;
 
-CREATE TABLE Error_Reports (
-  id 				       INT 	 	     NOT NULL,
-  user_id 		 	   INT 	 	     DEFAULT NULL,
-  status 			     bit(1)  	   NOT NULL,
-  created_at 		   timestamp 	 NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at 		   timestamp 	 NULL DEFAULT NULL,
-  os_version 		   varchar(45) DEFAULT NULL,
-  release_version  varchar(45) DEFAULT NULL,
-  platform 		 	   text,
-  model 			     text,
-  error_id 		 	   INT 	 	     DEFAULT NULL,
-  PRIMARY KEY (id)
-);
+CREATE TABLE Error_Reports 
+(id INTEGER NOT NULL auto_increment ,
+ user_id INTEGER, 
+ os_version VARCHAR(255), 
+ release_version VARCHAR(255), 
+ platform TEXT, 
+ model TEXT, 
+ error_id INTEGER, 
+ manufacturer VARCHAR(255), 
+ date DATETIME, 
+ error_type VARCHAR(255), 
+ status INTEGER DEFAULT 0, 
+ created_at DATETIME NOT NULL, 
+ updated_at DATETIME NOT NULL, 
+ PRIMARY KEY (id)) ENGINE=InnoDB;
 
-CREATE TABLE User_Crash_Steps (
-  report_id 	 INT  	  NOT NULL,
-  step_id 		 INT  	  NOT NULL,
-  actionOn 		 text,
-  date 			   datetime DEFAULT NULL,
-  id 			     INT  	  NOT NULL,
-  description  text,
-  PRIMARY KEY (id),
-  CONSTRAINT fk_User_Crash_Steps_1 FOREIGN KEY (report_id) REFERENCES Error_Reports (id)    ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT fk_User_Crash_Steps_2 FOREIGN KEY (step_id)   REFERENCES Crash_Steps (step_id) ON DELETE NO ACTION ON UPDATE NO ACTION
-);
+  CREATE TABLE User_Crash_Steps 
+  (report_id INTEGER NOT NULL, 
+  step_id INTEGER NOT NULL, 
+  actionOn TEXT, 
+  date DATETIME, 
+  id INTEGER NOT NULL auto_increment , 
+  description TEXT, 
+  created_at DATETIME NOT NULL, 
+  updated_at DATETIME NOT NULL, 
+  PRIMARY KEY (id)) ENGINE=InnoDB;
