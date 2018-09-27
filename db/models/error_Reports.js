@@ -42,7 +42,7 @@ module.exports = function(sequelize, DataTypes) {
         },
         status:{
             type: Sequelize.INTEGER,
-            defaultValue: 0
+            defaultValue: 1
         }
     }, {
         timestamps: true,

@@ -144,7 +144,7 @@ exports.report = {
                 error_id: crash_error.error_id,
                 manufacturer: User_Device_Information.manufacturer,
                 date: new Date(User_Device_Information.date),
-                status: 0
+                status: 1
             }, { transaction: transactionObject })
 
             let CrashSteps = await db.Crash_Steps.bulkCreate(
