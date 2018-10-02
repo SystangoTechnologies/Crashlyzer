@@ -77,3 +77,4 @@ Docker-Compose up
 
 ## Contributors
 [Arpit Khandelwal](https://www.linkedin.com/in/arpitkhandelwal1984/)
+[Anurag Vikram Singh](https://www.linkedin.com/in/anuragvikramsingh/)
